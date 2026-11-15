@@ -134,3 +134,20 @@ jobs:
           assert int(mm.group(1)) == len(nums) + 1, f"模板建议 F{mm.group(1)}，应为 F{len(nums) + 1}"
           print(f"OK: {len(nums)} 条，编号 1..{len(nums)} 连续，4 处口径一致，模板指向 F{len(nums) + 1}")
           PY
+
+      # 9) URL 占位符残留：`OWNER` / `YOUR_ORG` 之类留在链接里就是 404。
+      #    首推后 T07 抓到 https://github.com/OWNER/ontology-kb → 404，加这条防复发。
+      #    与步骤 5 同理，排除本文件（模式文本在这里，会自命中，见 F16）。
+      #    注意 docs/09 里的 `/Users/<name>` 是失败模式的示例写法，属正文，排除。
+      - name: URL 占位符残留
+        run: |
+          set +e
+          out=$(git grep -nE '(github\.com/(OWNER|YOUR_ORG|your-org)|OWNER/ontology|<OWNER>|YOUR_ORG/)' \
+                -- '*.md' '*.cff' '*.json' '*.yml' \
+                ':!docs/09-failure-modes.md' ':!.github/workflows/guard.yml')
+          if [ -n "$out" ]; then
+            echo "$out"
+            echo "::error::链接里残留占位符，发布后是 404"
+            exit 1
+          fi
+          echo "OK: 0 命中"

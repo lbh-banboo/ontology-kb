@@ -10,7 +10,7 @@
 无需安装，零第三方依赖，Python 3.9+ 即可跑：
 
 ```bash
-git clone https://github.com/OWNER/ontology-kb && cd ontology-kb
+git clone https://github.com/lbh-banboo/ontology-kb && cd ontology-kb
 
 python3 vault/_kb/kb.py check     # 校验：期望 violation 0
 python3 vault/_kb/kb.py test      # 回归：期望 10/10 PASS
