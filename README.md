@@ -85,7 +85,7 @@ python3 vault/_kb/kb.py ask 注水手法   # 查询：它依赖什么
 | [06 生命周期](docs/06-lifecycle.md) | 过期、替代链、复核 |
 | [07 评测](docs/07-evaluation.md) | 冻结题集、四项门槛、拒答率 |
 | [08 同步与唯一写入点](docs/08-sync-single-writer.md) | 云盘镜像 + Git 单向出口 |
-| [09 15 条失败模式](docs/09-failure-modes.md) | 全是踩过的 |
+| [09 17 条失败模式](docs/09-failure-modes.md) | 全是踩过的 |
 | [10 Playbook](docs/10-playbook.md) | **12 步，每步有验收判据** |
 
 如果只想看一份文档：读 [docs/10-playbook.md](docs/10-playbook.md)。

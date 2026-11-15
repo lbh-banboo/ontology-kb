@@ -56,12 +56,24 @@ jobs:
           print(f"OK: 结构+治理 12，决策 3，合计 {len(R.FORWARD)}")
           PY
 
-      # 5) 敏感串扫描：排除两处必须写出危险模式的反例文件
+      # 5) 敏感串扫描
+      #
+      # ⚠️ 必须排除本文件自身（:!.github/workflows/guard.yml）。
+      #    模式文本就写在这一步里，`git grep` 扫全仓时会把它当成命中物 →
+      #    判据与被判对象是同一个集合，自指恒红（见 docs/09 F16）。
+      #    排除留下的盲区，由下一步「workflow 自检」单独覆盖。
+      #
+      #    另排除两个**必须**写出危险模式的反例文件：
+      #    SECURITY.md、docs/09-failure-modes.md。
+      #
+      #    ⚠️ 模式里只用 [[:space:]]，不用 \s。\s 是 GNU 扩展，
+      #    macOS 的 BSD 正则引擎不认 → 本机跑同一模式会静默失效，
+      #    而 CI（ubuntu/glibc）却是生效的，两边口径不一致（见 docs/09 F17）。
       - name: 敏感串扫描
         run: |
           set +e
-          out=$(git grep -nE '(/Users/[A-Za-z]|/home/[A-Za-z]|BEGIN PRIVATE KEY|API_KEY=|api[_-]?key["'"'"']?\s*[:=]\s*["'"'"'][A-Za-z0-9]{16,})' \
-                -- . ':!SECURITY.md' ':!docs/09-failure-modes.md')
+          out=$(git grep -nE '(/Users/[A-Za-z]|/home/[A-Za-z]|BEGIN PRIVATE KEY|API_KEY=|api[_-]?key["'"'"']?[[:space:]]*[:=][[:space:]]*["'"'"'][A-Za-z0-9]{16,})' \
+                -- . ':!SECURITY.md' ':!docs/09-failure-modes.md' ':!.github/workflows/guard.yml')
           if [ -n "$out" ]; then
             echo "$out"
             echo "::error::发现疑似凭据或本机绝对路径"
@@ -69,7 +81,24 @@ jobs:
           fi
           echo "OK: 0 命中"
 
-      # 6) 示例库规模断言：防止误把真实卡片带进来
+      # 6) workflow 自检：补上一步排除自身留下的盲区。
+      #    这里不扫字面量（会再次自命中），只断言**结构**：
+      #    本仓库不需要任何凭据，所以不该出现 secrets 引用，也不该出现凭据型 env 赋值。
+      - name: workflow 自检
+        run: |
+          f=.github/workflows/guard.yml
+          if grep -nE 'secrets\.' "$f"; then
+            echo "::error::workflow 引用了 secrets，本仓库不需要任何凭据"
+            exit 1
+          fi
+          # 形如 `  TOKEN: abc` / `  API_KEY: sk-...` 的 YAML 赋值
+          if grep -nE '^\s+[A-Z0-9_]*(KEY|TOKEN|SECRET|PASSWORD)[A-Z0-9_]*\s*:\s*\S' "$f"; then
+            echo "::error::workflow 出现形似凭据的环境变量赋值"
+            exit 1
+          fi
+          echo "OK: 无 secrets 引用、无凭据型 env 赋值"
+
+      # 7) 示例库规模断言：防止误把真实卡片带进来
       - name: 示例库规模
         run: |
           n=$(find vault/cards vault/decisions -name '*.md' | wc -l | tr -d ' ')
@@ -78,3 +107,30 @@ jobs:
             echo "::error::示例库应为 11 张卡（9 知识 + 2 决策），实为 $n。若有意变更，请同步更新本条断言与本步骤注释。"
             exit 1
           fi
+
+      # 8) 失败模式条数一致性：标题写 N 条，就必须真有 N 条，且 4 处引用同口径。
+      #    历史上同一个数字在标题、表格、代码里出现过三个值（F1），这条是它的复发点。
+      - name: 失败模式条数一致性
+        run: |
+          python3 - <<'PY'
+          import re, pathlib
+          doc = pathlib.Path("docs/09-failure-modes.md").read_text(encoding="utf-8")
+          m = re.search(r"^# 09 · (\d+) 条失败模式", doc, re.M)
+          assert m, "docs/09 缺少『# 09 · N 条失败模式』标题"
+          declared = int(m.group(1))
+          nums = [int(x) for x in re.findall(r"^## F(\d+) ", doc, re.M)]
+          assert nums == list(range(1, len(nums) + 1)), f"F 编号不连续：{nums}"
+          assert declared == len(nums), f"标题写 {declared} 条，实际 {len(nums)} 条"
+          for f, pat in [("README.md", r"\[09 (\d+) 条失败模式\]"),
+                         ("docs/00-index.md", r"\| (\d+) 条失败模式 \|"),
+                         ("CHANGELOG.md", r"含 (\d+) 条失败模式")]:
+              t = pathlib.Path(f).read_text(encoding="utf-8")
+              mm = re.search(pat, t)
+              assert mm, f"{f} 找不到条数声明"
+              assert int(mm.group(1)) == declared, f"{f} 写 {mm.group(1)}，与 docs/09 的 {declared} 不一致"
+          tpl = pathlib.Path(".github/ISSUE_TEMPLATE/failure-mode.md").read_text(encoding="utf-8")
+          mm = re.search(r"建议编号 F(\d+)", tpl)
+          assert mm, "failure-mode 模板缺少『建议编号 F..』"
+          assert int(mm.group(1)) == len(nums) + 1, f"模板建议 F{mm.group(1)}，应为 F{len(nums) + 1}"
+          print(f"OK: {len(nums)} 条，编号 1..{len(nums)} 连续，4 处口径一致，模板指向 F{len(nums) + 1}")
+          PY

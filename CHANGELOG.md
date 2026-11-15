@@ -21,7 +21,10 @@
   - `kb.py test` 关系回归题集
   - `kb.py export / stats` 导出与统计
 - `tools/pre-commit` 提交前守门（三道拦截）+ `install-hooks.sh`
-- `docs/` 11 篇方法与步骤文档，含 15 条失败模式与 12 步 playbook
+- `.github/workflows/guard.yml` CI 守门（8 道断言：violation／关系回归／unittest／
+  关系计数／敏感串／workflow 自检／示例库规模／失败模式条数）。actions pin 到 commit SHA，
+  `permissions: contents: read`，`persist-credentials: false`
+- `docs/` 11 篇方法与步骤文档，含 17 条失败模式与 12 步 playbook
 - `vault/cards/`、`vault/decisions/` 虚构示例数据集（11 张卡，手冲咖啡域），用于验证规范与工具
 - `tests.json` 演示规模回归题集（10 题，含 1 条负样本）
 
@@ -32,6 +35,16 @@
   因原口径在真实使用中全库无一张卡合规，而校验器只查非空——规范与判据不一致（F4）
 - `owner` 字段：示例中统一为角色而非私人称呼
 - 补齐 §7「落地清单」，如实列出尚未实现的口径
+
+### 修正（首轮 CI 跑出来的）
+
+首推后 CI 红了，红在自带守门脚本上，两条都是判据自身的缺陷，已固化为 F16 / F17：
+
+- F16：敏感串扫描的模式文本写在自己要扫的 workflow 里，`git grep` 把它当成命中物，
+  自指恒红。修法：排除本文件 + 补一条不依赖字面量的结构断言（不许出现 `secrets.` 与凭据型 `env:`）
+- F17：模式里的 `\s` 是 GNU 扩展，macOS 的 BSD 引擎不认，本机「已验证通过」形同虚设。
+  修法：一律改用 POSIX 字符类 `[[:space:]]`
+- 另补一道断言，把失败模式条数钉在 4 处口径上（F1 的复发点）
 
 ### 已知限制
 
