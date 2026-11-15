@@ -1,0 +1,71 @@
+name: 报告一个 bug
+description: 工具跑出来的结果，和 README 或文档里写的不一致
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        先确认一件事：**你跑的是本仓库自带的示例库，还是自己改造过的库？**
+
+        如果改造过，请先跑一遍 `python3 vault/_kb/kb.py check`，
+        大部分「工具坏了」其实是卡片本身违反了规范，工具是对的。
+
+  - type: input
+    id: version
+    attributes:
+      label: 版本
+      description: 填 tag 或 commit sha（`git describe --tags --always`）
+      placeholder: v0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: env
+    attributes:
+      label: 环境
+      description: 操作系统 + Python 版本
+      placeholder: macOS 15.1 / Python 3.11.9
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现步骤
+      description: 从 clone 开始写，一条命令一行，别写「我操作了一下」
+      placeholder: |
+        git clone ... && cd ontology-kb
+        python3 vault/_kb/kb.py ask 注水手法
+        # 期望 A，实际 B
+      render: bash
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望 vs 实际
+      description: 直接贴两段输出，不要转述
+    validations:
+      required: true
+
+  - type: textarea
+    id: check_output
+    attributes:
+      label: "`kb.py check` 输出"
+      description: 整段贴，包括 violation 与 warn 计数
+      render: text
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 影响范围
+      options:
+        - 只影响我自己的库
+        - 仓库自带的示例库也复现
+        - 不确定
+    validations:
+      required: true

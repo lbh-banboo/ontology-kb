@@ -26,7 +26,8 @@
   失败模式条数／URL 占位符／根目录入库。
   actions pin 到 commit SHA，`permissions: contents: read`，`persist-credentials: false`
 - `.gitattributes`（统一 LF 换行、`docs/` 计入文档不影响语言统计）、
-  `PULL_REQUEST_TEMPLATE.md`、`.github/ISSUE_TEMPLATE/config.yml`（关空白 issue、导流文档）
+  `PULL_REQUEST_TEMPLATE.md`、`.github/ISSUE_TEMPLATE/config.yml`（关空白 issue、导流文档）、
+  `.github/ISSUE_TEMPLATE/bug-report.yml`（issue form：强制填复现步骤与 `kb.py check` 输出）
 - README 首屏：CI／许可／Python／零依赖四个徽章 + 一段英文摘要（吃国际搜索）
 - `docs/` 11 篇方法与步骤文档，含 17 条失败模式与 12 步 playbook
 - `vault/cards/`、`vault/decisions/` 虚构示例数据集（11 张卡，咖啡冲煮域），用于验证规范与工具
