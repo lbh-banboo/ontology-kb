@@ -1,9 +1,18 @@
 # ontology-kb · 用本体管住个人知识库的方法与工具
 
+[![guard](https://img.shields.io/github/actions/workflow/status/lbh-banboo/ontology-kb/guard.yml?label=guard)](https://github.com/lbh-banboo/ontology-kb/actions/workflows/guard.yml)
+[![license](https://img.shields.io/github/license/lbh-banboo/ontology-kb)](LICENSE)
+[![python](https://img.shields.io/badge/python-3.9%2B-blue)](https://www.python.org/)
+[![dependencies](https://img.shields.io/badge/dependencies-0-brightgreen)](vault/_kb/kb.py)
+
 **一个不靠向量检索、不靠 LLM 猜关系的个人知识库方案。**
 关系写进 frontmatter 成为结构化数据，于是它可以被确定性查询、被回归测试、被提交前拦截。
 
 **本仓库只提供方法与工具，不含任何人的真实知识内容。** 卡片目录里是一套虚构的示例数据集（咖啡冲煮域），用于证明规范与工具能跑通。
+
+> **English** — An ontology-driven personal knowledge base. Relationships live in Markdown
+> frontmatter as *typed* data, so they can be queried deterministically, regression-tested,
+> and gated before commit. Zero dependencies, local-first, no vector search, no LLM relation extraction.
 
 ## 快速开始
 

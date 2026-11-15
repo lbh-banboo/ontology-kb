@@ -1,0 +1,19 @@
+# Issue 模板目录的配置。
+#
+# ⚠️ 这里不放 Discussions 的链接：Discussions 目前**没开**，写了就是死链。
+# 本仓库已经因为一个占位链接踩过一次（发布后 404），不再犯第二次。
+# 等仓库 Settings → Features 里勾上 Discussions 之后，再加这一段：
+#
+#   - name: 用法讨论 / 提问
+#     url: https://github.com/lbh-banboo/ontology-kb/discussions
+#     about: 不确定算不算 bug、想聊思路，去 Discussions 而不是开 issue
+
+blank_issues_enabled: false
+
+contact_links:
+  - name: 先读文档（11 篇方法与步骤）
+    url: https://github.com/lbh-banboo/ontology-kb/blob/main/docs/00-index.md
+    about: 绝大多数「怎么用」的问题在文档里已经有答案，含 12 步 playbook 与 17 条失败模式
+  - name: 报告安全问题
+    url: https://github.com/lbh-banboo/ontology-kb/blob/main/SECURITY.md
+    about: 请勿用公开 issue 报安全问题，按 SECURITY.md 的渠道走

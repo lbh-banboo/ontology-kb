@@ -1,0 +1,13 @@
+# 统一换行符。Windows 贡献者不加这条，一次提交可能把整个仓库改一遍（假 diff），
+# 而本仓库的判据大量依赖行级扫描，CRLF 会让匹配静默失效。
+* text=auto eol=lf
+
+# 显式声明二进制，避免被当文本比较
+*.png binary
+*.jpg binary
+*.gif binary
+*.zip binary
+
+# 让 GitHub 的语言统计如实反映「这是个 Python 工具」——
+# docs/ 计入文档而不是 Markdown 语言，不被文档体量稀释。
+docs/** linguist-documentation

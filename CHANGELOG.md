@@ -21,9 +21,13 @@
   - `kb.py test` 关系回归题集
   - `kb.py export / stats` 导出与统计
 - `tools/pre-commit` 提交前守门（三道拦截）+ `install-hooks.sh`
-- `.github/workflows/guard.yml` CI 守门（9 道断言：violation／关系回归／unittest／关系计数／敏感串／
-  workflow 自检／示例库规模／失败模式条数／URL 占位符）。actions pin 到 commit SHA，
-  `permissions: contents: read`，`persist-credentials: false`
+- `.github/workflows/guard.yml` CI 守门，逐条列出（**不写「N 道」**——数字会漂移，写死就是维护债）：
+  violation／关系回归／unittest／关系计数／敏感串／workflow 自检／示例库规模／
+  失败模式条数／URL 占位符／根目录入库。
+  actions pin 到 commit SHA，`permissions: contents: read`，`persist-credentials: false`
+- `.gitattributes`（统一 LF 换行、`docs/` 计入文档不影响语言统计）、
+  `PULL_REQUEST_TEMPLATE.md`、`.github/ISSUE_TEMPLATE/config.yml`（关空白 issue、导流文档）
+- README 首屏：CI／许可／Python／零依赖四个徽章 + 一段英文摘要（吃国际搜索）
 - `docs/` 11 篇方法与步骤文档，含 17 条失败模式与 12 步 playbook
 - `vault/cards/`、`vault/decisions/` 虚构示例数据集（11 张卡，咖啡冲煮域），用于验证规范与工具
 - `tests.json` 演示规模回归题集（10 题，含 1 条负样本）
@@ -55,6 +59,13 @@
   本步管已无尖括号但仍是占位的用户名）
 - 敏感串黑名单移除 `lbh-banboo`：它是本仓库的公开托管账号，已写在 URL 里，
   强制占位会让 clone 命令不可用；私有账号与私有仓库名仍保留在名单内
+
+### 修正（第三轮：可发现性与元数据）
+
+- 白名单 `.gitignore` 把新加的 `.gitattributes` 与 PR 模板**静默吃掉**了（不报错、
+  `git status` 看不见）。已放行，并补第 10 道断言：磁盘根目录文件与 git 已跟踪文件的差集必须为空
+- 失败模式条数断言从「列举 4 个文件」改为**全仓扫描**：每加一个引用文件都要改判据的写法不可持续
+- `.gitattributes` 加 `docs/** linguist-documentation`：语言统计如实反映这是个 Python 工具
 
 ### 已知限制
 

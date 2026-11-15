@@ -1,5 +1,10 @@
 # 白名单策略：默认全部忽略，只放行明确列出的内容。
 # 为什么不用黑名单：`git add .` 是常态，黑名单漏一项就会把不该进库的东西带进历史（见 docs/09 F15）。
+#
+# ⚠️ 白名单的代价：**新增的根目录文件如果不在这里放行，会被静默丢掉** ——
+# 不报错、不提示，`git status` 里也看不到。这个坑真踩过：
+# 加 .gitattributes 与 PULL_REQUEST_TEMPLATE.md 时两者都消失了。
+# 现在 CI 第 10 道断言会检查「磁盘上有、git 里没有的根目录文件」。
 /*
 !/.github/
 !/docs/
@@ -14,6 +19,8 @@
 !/CITATION.cff
 !/CHANGELOG.md
 !/.gitignore
+!/.gitattributes
+!/PULL_REQUEST_TEMPLATE.md
 
 # —— 以下均不进版本库 ——
 
