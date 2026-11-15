@@ -1,0 +1,80 @@
+name: guard
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      # actions 一律 pin 到 commit SHA（tag 可被移动，SHA 不会）：
+      #   actions/checkout      v4.2.2
+      #   actions/setup-python  v5.6.0
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.11"
+
+      # 1) 写入前校验：只拦 violation，warn 允许存在（存量欠账不阻断，见 docs/05）
+      - name: kb.py check（violation 必须为 0）
+        run: |
+          python3 vault/_kb/kb.py check | tee /tmp/check.txt
+          if ! grep -q "violation 0" /tmp/check.txt; then
+            echo "::error::存在 violation，拒绝合并"
+            exit 1
+          fi
+
+      # 2) 关系回归
+      - name: kb.py test（关系题集必须全过）
+        run: python3 vault/_kb/kb.py test
+
+      # 3) 单元测试
+      - name: unittest
+        run: python3 -m unittest discover -s vault/_kb -p "test_*.py" -v
+
+      # 4) 规范与代码的关系计数必须相等（历史上出过 11/12/15 三个数并存，见 docs/09 F1）
+      - name: 关系计数一致性
+        run: |
+          python3 - <<'PY'
+          import re, sys
+          sys.path.insert(0, "vault/_kb")
+          import onto_rules as R
+          doc = open("vault/_schema/ontology.md", encoding="utf-8").read()
+          head = re.search(r"## 3\. 关系类型（([^）]*)）", doc)
+          assert head, "ontology.md 缺少 §3 关系类型标题"
+          text = head.group(1)
+          assert "= 12" in text and "合计 15" in text, f"§3 标题计数口径不对：{text}"
+          assert len(R.FORWARD) == 15, f"FORWARD 长度 {len(R.FORWARD)} != 15"
+          assert len(R.DECISION_RELS) == 3, f"决策关系 {len(R.DECISION_RELS)} != 3"
+          print(f"OK: 结构+治理 12，决策 3，合计 {len(R.FORWARD)}")
+          PY
+
+      # 5) 敏感串扫描：排除两处必须写出危险模式的反例文件
+      - name: 敏感串扫描
+        run: |
+          set +e
+          out=$(git grep -nE '(/Users/[A-Za-z]|/home/[A-Za-z]|BEGIN PRIVATE KEY|API_KEY=|api[_-]?key["'"'"']?\s*[:=]\s*["'"'"'][A-Za-z0-9]{16,})' \
+                -- . ':!SECURITY.md' ':!docs/09-failure-modes.md')
+          if [ -n "$out" ]; then
+            echo "$out"
+            echo "::error::发现疑似凭据或本机绝对路径"
+            exit 1
+          fi
+          echo "OK: 0 命中"
+
+      # 6) 示例库规模断言：防止误把真实卡片带进来
+      - name: 示例库规模
+        run: |
+          n=$(find vault/cards vault/decisions -name '*.md' | wc -l | tr -d ' ')
+          echo "卡片数：$n"
+          if [ "$n" -ne 11 ]; then
+            echo "::error::示例库应为 11 张卡（9 知识 + 2 决策），实为 $n。若有意变更，请同步更新本条断言与本步骤注释。"
+            exit 1
+          fi

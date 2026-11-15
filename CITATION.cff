@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "如果本仓库的方法论或工具对你的工作有帮助，请按以下格式引用。"
+title: "ontology-kb: 用本体管住个人知识库的方法与工具"
+abstract: >-
+  一套不依赖向量检索、不依赖模型自动抽取关系的个人知识库方案：
+  把知识之间的联系写入卡片 frontmatter 成为结构化数据，
+  使其可被确定性查询、被回归测试、被提交前守门拦截。
+  仓库提供受控词表（TBox）、卡片规范、零依赖 CLI 与分步 playbook。
+type: software
+version: 0.1.0
+date-released: "2026-11-15"
+license:
+  - Apache-2.0
+  - CC-BY-4.0
+keywords:
+  - knowledge-base
+  - ontology
+  - knowledge-graph
+  - personal-knowledge-management
+  - markdown
+  - frontmatter
+repository-code: "https://github.com/OWNER/ontology-kb"
+authors:
+  - name: "ontology-kb contributors"
+preferred-citation:
+  type: generic
+  title: "ontology-kb: 用本体管住个人知识库的方法与工具"
+  year: 2026
+  authors:
+    - name: "ontology-kb contributors"

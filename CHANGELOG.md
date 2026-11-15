@@ -1,0 +1,40 @@
+# 变更记录
+
+格式参照 Keep a Changelog；版本号参照 SemVer。
+本仓库的「版本」指**规范与工具的兼容性**，不指卡片内容数量。
+
+## [0.1.0] — 2026-11-15
+
+首个公开版本。内容为方法与工具，**不含任何人的真实知识卡片**。
+
+### 新增
+
+- `vault/_schema/ontology.md` v1.0（public）：TBox 规范
+  - 5 类实体（Concept / Method / Tool / Scenario / Pattern）
+  - 15 条关系（结构 7 + 治理与时态 5 + 决策 3）
+  - 关系语义属性表（domain/range、传递性、反推、模态、前置条件）
+  - 模态三分（universal / possible / instance）与写法
+  - 决策层（生命周期 + chooses / rejects / based_on）
+- `vault/_kb/` 零依赖 CLI
+  - `kb.py check` 写入前校验
+  - `kb.py ask / impact / constraints / lineage / chain` 查询
+  - `kb.py test` 关系回归题集
+  - `kb.py export / stats` 导出与统计
+- `tools/pre-commit` 提交前守门（三道拦截）+ `install-hooks.sh`
+- `docs/` 11 篇方法与步骤文档，含 15 条失败模式与 12 步 playbook
+- `vault/cards/`、`vault/decisions/` 虚构示例数据集（11 张卡，手冲咖啡域），用于验证规范与工具
+- `tests.json` 演示规模回归题集（10 题，含 1 条负样本）
+
+### 修正（相对内部 v0.3 规范）
+
+- 统一关系计数：标题「11 个」→ 与表格、代码一致的 12（结构 7 + 治理 5），决策关系 3 另计，合计 15
+- `anchors` 口径：从「必须是稳定 media_id」改为「可独立定位即可」，
+  因原口径在真实使用中全库无一张卡合规，而校验器只查非空——规范与判据不一致（F4）
+- `owner` 字段：示例中统一为角色而非私人称呼
+- 补齐 §7「落地清单」，如实列出尚未实现的口径
+
+### 已知限制
+
+- 评测门槛 **PENDING**：示例库未建 100 题级冻结题集，四项门槛无实测数字
+- `anchors` 仍无数值格式判据，`possible` 模态尚无「不得作为答案直引」的机器判据
+- 守门为全量检查，未做增量优化（几千张卡时会变慢，见 docs/05 §5.7）

@@ -1,0 +1,63 @@
+#!/bin/sh
+# 提交前守门：关系不合规的卡不允许进版本历史。
+#   1) 疑似云盘冲突副本「xxx 2.md」不允许入库
+#   2) kb.py check —— 有 violation 即拒绝提交（warn 放行）
+#   3) kb.py test  —— 关系题回归必须全过
+# 安装：bash tools/install-hooks.sh
+# 紧急绕过：git commit --no-verify（不推荐；绕过后请立刻补跑 kb.py check）
+#
+# 两个踩过的坑都写在这里，改这个文件时别踩回去：
+#   - git 默认 core.quotepath=true，非 ASCII 路径会被转义加引号，行尾多个 " 就让
+#     `grep -E ' [2-9]\.md$'` 永远匹配不上（副本卡第一次就是这样溜进版本的）。
+#     这里改用 python 按 basename 判，不依赖路径是否被转义。
+#   - PATH 里第一个 grep 可能被各种 shim 劫持，行为与系统 grep 有差异，能不用就不用。
+set -u
+ROOT="$(git rev-parse --show-toplevel)"
+PY="${KB_PYTHON:-python3}"
+command -v "$PY" >/dev/null 2>&1 || { echo "❌ 找不到 $PY：请设置 KB_PYTHON 指向 python3"; exit 1; }
+cd "$ROOT/vault/_kb" || exit 1
+
+if ! git -C "$ROOT" diff --cached --name-only --diff-filter=A -z \
+     | "$PY" -c '
+import re, sys
+bad = [p for p in sys.stdin.buffer.read().decode("utf-8", "surrogateescape").split("\0")
+       if p and re.search(r" [2-9]\.md$", p.rsplit("/", 1)[-1])]
+if bad:
+    print("❌ 拒绝提交：疑似云盘冲突副本（先人工比对内容、合并成一份、删掉副本）：")
+    for p in bad:
+        print("   " + p)
+    sys.exit(1)
+'; then
+  exit 1
+fi
+
+if ! "$PY" kb.py check > /tmp/kb_precommit_check.txt 2>&1; then
+  echo "❌ 拒绝提交：kb.py check 有 violation"
+  "$PY" -c '
+for l in open("/tmp/kb_precommit_check.txt", encoding="utf-8"):
+    if l.startswith("| violation"):
+        print("  " + l.rstrip())
+' | head -20
+  echo "（完整报告：vault/_out/check.md）"
+  exit 1
+fi
+
+if ! "$PY" kb.py test > /tmp/kb_precommit_test.txt 2>&1; then
+  echo "❌ 拒绝提交：关系题回归未全过"
+  "$PY" -c '
+for l in open("/tmp/kb_precommit_test.txt", encoding="utf-8"):
+    if l.startswith("[FAIL]") or "PASS" in l:
+        print("  " + l.rstrip())
+'
+  exit 1
+fi
+
+"$PY" -c '
+# 汇总行形如「- **violation 0** ｜ warn 15」：markdown 标记要整行去掉，不能只 strip 首尾。
+def clean(s):
+    return s.replace("**", "").strip().strip("-").strip()
+ck = open("/tmp/kb_precommit_check.txt", encoding="utf-8").read().splitlines()[3]
+ts = [l for l in open("/tmp/kb_precommit_test.txt", encoding="utf-8") if "断言" in l][-1]
+print("✅ 守门通过：" + clean(ck) + " ｜ " + clean(ts))
+'
+exit 0

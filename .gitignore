@@ -1,0 +1,36 @@
+# 白名单策略：默认全部忽略，只放行明确列出的内容。
+# 为什么不用黑名单：`git add .` 是常态，黑名单漏一项就会把不该进库的东西带进历史（见 docs/09 F15）。
+/*
+!/.github/
+!/docs/
+!/vault/
+!/tools/
+!/README.md
+!/LICENSE
+!/LICENSE-CONTENT.md
+!/CONTRIBUTING.md
+!/CODE_OF_CONDUCT.md
+!/SECURITY.md
+!/CITATION.cff
+!/CHANGELOG.md
+!/.gitignore
+
+# —— 以下均不进版本库 ——
+
+# 可由 kb.py 重建
+vault/_out/
+
+# Python 缓存
+**/__pycache__/
+*.pyc
+*.pyo
+
+# 编辑器与系统
+.DS_Store
+.obsidian/workspace*.json
+*.swp
+
+# 同步状态与本地备份
+.icloud-sync-state.json
+vault.backup-*/
+*.tmp
