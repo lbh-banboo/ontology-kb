@@ -25,7 +25,7 @@
   关系计数／敏感串／workflow 自检／示例库规模／失败模式条数）。actions pin 到 commit SHA，
   `permissions: contents: read`，`persist-credentials: false`
 - `docs/` 11 篇方法与步骤文档，含 17 条失败模式与 12 步 playbook
-- `vault/cards/`、`vault/decisions/` 虚构示例数据集（11 张卡，手冲咖啡域），用于验证规范与工具
+- `vault/cards/`、`vault/decisions/` 虚构示例数据集（11 张卡，咖啡冲煮域），用于验证规范与工具
 - `tests.json` 演示规模回归题集（10 题，含 1 条负样本）
 
 ### 修正（相对内部 v0.3 规范）
