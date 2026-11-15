@@ -21,8 +21,8 @@
   - `kb.py test` 关系回归题集
   - `kb.py export / stats` 导出与统计
 - `tools/pre-commit` 提交前守门（三道拦截）+ `install-hooks.sh`
-- `.github/workflows/guard.yml` CI 守门（8 道断言：violation／关系回归／unittest／
-  关系计数／敏感串／workflow 自检／示例库规模／失败模式条数）。actions pin 到 commit SHA，
+- `.github/workflows/guard.yml` CI 守门（9 道断言：violation／关系回归／unittest／关系计数／敏感串／
+  workflow 自检／示例库规模／失败模式条数／URL 占位符）。actions pin 到 commit SHA，
   `permissions: contents: read`，`persist-credentials: false`
 - `docs/` 11 篇方法与步骤文档，含 17 条失败模式与 12 步 playbook
 - `vault/cards/`、`vault/decisions/` 虚构示例数据集（11 张卡，咖啡冲煮域），用于验证规范与工具
@@ -45,6 +45,16 @@
 - F17：模式里的 `\s` 是 GNU 扩展，macOS 的 BSD 引擎不认，本机「已验证通过」形同虚设。
   修法：一律改用 POSIX 字符类 `[[:space:]]`
 - 另补一道断言，把失败模式条数钉在 4 处口径上（F1 的复发点）
+
+### 修正（第二轮：投放前审核跑出来的）
+
+- `CITATION.cff` 与 README 的 clone 命令里仍保留着未替换的用户名占位（发布后是 404）
+  —— 脱敏把账号名换成占位符，忘了这两处是给人点的。已换成真实地址
+  （此处刻意不复述那个占位写法：写出来就正好是第 9 道断言的靶子）
+- 补第 9 道断言「URL 占位符残留」，与 preflight G10 互补（G10 管带尖括号的模板词，
+  本步管已无尖括号但仍是占位的用户名）
+- 敏感串黑名单移除 `lbh-banboo`：它是本仓库的公开托管账号，已写在 URL 里，
+  强制占位会让 clone 命令不可用；私有账号与私有仓库名仍保留在名单内
 
 ### 已知限制
 
