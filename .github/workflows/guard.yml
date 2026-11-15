@@ -135,19 +135,24 @@ jobs:
           print(f"OK: {len(nums)} 条，编号 1..{len(nums)} 连续，4 处口径一致，模板指向 F{len(nums) + 1}")
           PY
 
-      # 9) URL 占位符残留：`OWNER` / `YOUR_ORG` 之类留在链接里就是 404。
-      #    首推后 T07 抓到 https://github.com/OWNER/ontology-kb → 404，加这条防复发。
-      #    与步骤 5 同理，排除本文件（模式文本在这里，会自命中，见 F16）。
-      #    注意 docs/09 里的 `/Users/<name>` 是失败模式的示例写法，属正文，排除。
+      # 9) URL 占位符残留：用户名的占位**忘了替换**，发布后就是 404。
+      #    首推后 B 段 T07 逐条探活，抓到 https://github.com/OWNER/ontology-kb → 404。
+      #
+      #    本步与 preflight G10 故意**互补不重复**：
+      #      G10 管「一看就没填」的形态——尖括号包着的占位词、全大写下划线的模板变量、待办标记
+      #      本步只管它抓不到的形态——链接里直接写了用户名占位，一个尖括号都没有
+      #    因此这里只出现无尖括号的那两种。**注释里也不许举尖括号例子**：
+      #    举了就等于把 G10 的靶子贴到自己文件上（又一次自命中，见 F16）。
+      #    本文件同样排除于扫描之外，理由同步骤 5。
       - name: URL 占位符残留
         run: |
           set +e
-          out=$(git grep -nE '(github\.com/(OWNER|YOUR_ORG|your-org)|OWNER/ontology|<OWNER>|YOUR_ORG/)' \
+          out=$(git grep -nE '(github\.com/OWNER|OWNER/ontology)' \
                 -- '*.md' '*.cff' '*.json' '*.yml' \
                 ':!docs/09-failure-modes.md' ':!.github/workflows/guard.yml')
           if [ -n "$out" ]; then
             echo "$out"
-            echo "::error::链接里残留占位符，发布后是 404"
+            echo "::error::链接里残留用户名占位符，发布后是 404"
             exit 1
           fi
           echo "OK: 0 命中"
